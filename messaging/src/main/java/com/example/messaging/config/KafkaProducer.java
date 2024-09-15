@@ -1,4 +1,4 @@
-package com.example.messaging.producer;
+package com.example.messaging.config;
 
 import com.example.messaging.Constants;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -17,18 +17,18 @@ import java.util.Map;
 
 
 @Configuration
-public class Producer {
+public class KafkaProducer {
 
     final KafkaProperties kafkaProperties;
 
-    public Producer(KafkaProperties kafkaProperties) {
+    public KafkaProducer(KafkaProperties kafkaProperties) {
         this.kafkaProperties = kafkaProperties;
     }
 
 
     @Bean
     public Map<String, Object> producerConfiguration() {
-        Map<String, Object> properties = new HashMap<>(kafkaProperties.buildProducerProperties());
+        Map<String, Object> properties = new HashMap<>(kafkaProperties.buildProducerProperties(null));
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         return properties;

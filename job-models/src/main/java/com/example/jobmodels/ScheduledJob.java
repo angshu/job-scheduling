@@ -13,6 +13,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScheduledJob implements Serializable {
+    private String id;
     private String jobType;
     private String title;
     private EventTiming repeat;

@@ -1,9 +1,21 @@
 server:
   port: 8080
+logging:
+  level:
+    root: info
+scheduled-jobs:
+  enabled: true
 spring:
   application:
     name: job-acceptor-scanner
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: group-1
+      auto-offset-reset: earliest
+    producer:
+      auto-offset-reset: earliest

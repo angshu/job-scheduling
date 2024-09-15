@@ -1,4 +1,4 @@
-package com.example.messaging.consumer;
+package com.example.job_acceptor_scanner.config;
 
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -9,11 +9,11 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 @org.springframework.context.annotation.Configuration
-public class Consumer {
+public class KafkaConsumer {
 
     final KafkaProperties kafkaProperties;
 
-    public Consumer(KafkaProperties kafkaProperties) {
+    public KafkaConsumer(KafkaProperties kafkaProperties) {
         this.kafkaProperties = kafkaProperties;
     }
 
@@ -23,7 +23,7 @@ public class Consumer {
     ConsumerFactory<String, Object> consumerFactory() {
         final JsonDeserializer<Object> jsonDeserializer = new JsonDeserializer<>();
         jsonDeserializer.addTrustedPackages("*");
-        return new DefaultKafkaConsumerFactory<>(kafkaProperties.buildConsumerProperties(), new StringDeserializer(), jsonDeserializer);
+        return new DefaultKafkaConsumerFactory<>(kafkaProperties.buildConsumerProperties(null), new StringDeserializer(), jsonDeserializer);
     }
 
     @Bean
