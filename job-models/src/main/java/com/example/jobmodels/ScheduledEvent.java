@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.TimeToLive;
 
 import java.io.Serializable;
 
@@ -22,4 +23,6 @@ public class ScheduledEvent implements Serializable {
     private String jobType;
     private String title;
     private EventDetails data;
+    @TimeToLive
+    private Long expirationInSeconds;
 }

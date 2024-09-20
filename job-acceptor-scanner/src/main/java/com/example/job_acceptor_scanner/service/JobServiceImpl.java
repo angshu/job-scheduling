@@ -18,6 +18,7 @@ import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.Optional;
 public class JobServiceImpl implements JobService {
 
     private static final long NUM_EVENTS_TO_PROCESS = 1000;
+    public static final int EXPIRY_OFFSET_IN_SECS = 300;
     Logger logger = LoggerFactory.getLogger(JobServiceImpl.class);
     final private RedisTemplate<String, Object> redisTemplate;
     final private JobRepository jobRepository;
@@ -73,10 +75,8 @@ public class JobServiceImpl implements JobService {
     public List<ScheduledEvent> findMatchingEvents(String id) {
         String pattern = String.format("ScheduledEvent:%s*", id);
         logger.debug(String.format("context: scanning events for pattern: %s:", pattern));
-        RedisConnection redisConnection = null;
         List<String> scannedKeys = new ArrayList<>();
-        try {
-            redisConnection = Objects.requireNonNull(redisTemplate.getConnectionFactory()).getConnection();
+        try (RedisConnection redisConnection = Objects.requireNonNull(redisTemplate.getConnectionFactory()).getConnection()) {
             ScanOptions options = KeyScanOptions.scanOptions().match(pattern).count(NUM_EVENTS_TO_PROCESS).build();
             try (Cursor<byte[]> scanCursor = redisConnection.commands().scan(options)) {
                 while (scanCursor.hasNext()) {
@@ -86,10 +86,7 @@ public class JobServiceImpl implements JobService {
             }
         } catch (Exception e) {
             logger.error("error occurred while trying to execute scan", e);
-        } finally {
-            Objects.requireNonNull(redisConnection).close();
         }
-
         if (scannedKeys.isEmpty()) {
             logger.debug(String.format("context: no matching keys found for %s", pattern));
             return Collections.emptyList();
@@ -120,14 +117,15 @@ public class JobServiceImpl implements JobService {
         List<ScheduledEvent> events = new ArrayList<>();
         if (!dates.isEmpty()) {
             for (int i = 0; i < dates.size(); i++) {
-                logger.info("Event Date: " + dates.get(0));
+                LocalDateTime eventTime = dates.get(0);
                 String eventId = String.format("%s:%s:%d", Utils.getEventKey(dates.get(i)), job.getId(), i);
-                //String eventId = Utils.getEventKey(dates.get(i)).concat(":").concat(jobUuid).concat(":").concat(String.valueOf(i));
+                long timeToExpiry = ChronoUnit.SECONDS.between(LocalDateTime.now(), eventTime) + EXPIRY_OFFSET_IN_SECS;
                 events.add(ScheduledEvent.builder()
                         .id(eventId)
                         .jobType(job.getJobType())
                         .title(job.getTitle())
                         .data(job.getEvent())
+                        .expirationInSeconds(timeToExpiry)
                         .build());
             }
         }

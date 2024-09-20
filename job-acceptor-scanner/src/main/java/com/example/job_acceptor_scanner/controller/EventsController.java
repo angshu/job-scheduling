@@ -1,7 +1,6 @@
 package com.example.job_acceptor_scanner.controller;
 
 import com.example.job_acceptor_scanner.service.JobService;
-import com.example.job_acceptor_scanner.service.JobServiceImpl;
 import com.example.jobmodels.ScheduledEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
